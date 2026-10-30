@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coin Tăng Mạnh Binance</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Bố cục: một cột danh sách coin tăng mạnh nhất, thanh trạng thái dính trên cùng */
+:root{
+  --nen:#f3f5f2; --mat:#ffffff; --chu:#17201b; --phu:#5d6a62; --vien:#d9e0db; --nhan:#0b7a55; --nhan-nhat:#e1f3ea; --do:#c23b2e; --do-nhat:#fbe7e4;
+  --chu-than:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --chu-so:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--nen:#0f1512;--mat:#17201b;--chu:#e6ede8;--phu:#93a198;--vien:#2a352f;--nhan:#3fcf95;--nhan-nhat:#163527;--do:#ff7a6b;--do-nhat:#3a1b17;color-scheme:dark}}
+:root[data-theme="dark"]{--nen:#0f1512;--mat:#17201b;--chu:#e6ede8;--phu:#93a198;--vien:#2a352f;--nhan:#3fcf95;--nhan-nhat:#163527;--do:#ff7a6b;--do-nhat:#3a1b17;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--nen);color:var(--chu);font:15px/1.5 var(--chu-than);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.khung{max-width:720px;margin:0 auto}
+header{padding-block:22px 6px}
+h1{font-size:1.55rem;font-weight:800;margin:0}
+.mota{color:var(--phu);margin:4px 0 0;font-size:.92rem}
+.thanh{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--nen);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--vien)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--nen)}
+button{font:600 .9rem var(--chu-than);border-radius:10px;border:1px solid var(--nhan);background:var(--nhan);color:var(--mat);padding:9px 14px;cursor:pointer}
+.muc{display:flex;align-items:center;gap:6px;font-size:.9rem;font-weight:600}
+.muc input{width:5.2rem;font:700 1rem var(--chu-so);padding:7px 8px;border-radius:10px;border:1px solid var(--vien);background:var(--mat);color:var(--chu);text-align:right}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--nhan);outline-offset:2px}
+button:disabled{opacity:.55;cursor:wait}
+.trangthai{font-size:.85rem;color:var(--phu);flex:1 1 200px;min-width:0}
+.trangthai b{color:var(--chu);font-family:var(--chu-so)}
+.ds{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.dong{background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:11px 14px;display:grid;grid-template-columns:2.2rem 1fr auto;gap:2px 10px;align-items:center;text-decoration:none;color:inherit}
+.hang{font:700 .85rem var(--chu-so);color:var(--phu);grid-row:span 2}
+.ma{font-weight:800;font-size:1.08rem;min-width:0}
+.ma span{color:var(--phu);font-weight:400;font-size:.85rem}
+.tang{font:700 1.1rem var(--chu-so);color:var(--nhan);background:var(--nhan-nhat);padding:2px 10px;border-radius:8px;text-align:right}
+.phu{grid-column:2 / 4;font-size:.8rem;color:var(--phu);display:flex;flex-wrap:wrap;gap:2px 14px;font-variant-numeric:tabular-nums}
+.phu b{color:var(--chu);font-family:var(--chu-so);font-weight:500}
+.trong{background:var(--mat);border:1px dashed var(--vien);border-radius:12px;padding:18px;color:var(--phu);margin-top:14px}
+.loi{background:var(--do-nhat);color:var(--do);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="khung">
+<header>
+  <h1>Coin Tăng Mạnh Binance</h1>
+  <p class="mota">Tất cả cặp USDT giao ngay trên Binance có giá tăng vượt mức Tú đặt trong 24 giờ qua, xếp từ tăng mạnh nhất. Tự cập nhật mỗi phút.</p>
+</header>
+<div class="thanh">
+  <label class="muc" for="mucTang">Tăng trên <input id="mucTang" type="number" inputmode="decimal" step="1" min="0" value="10"> %</label>
+  <button id="nutQuet" type="button">Cập nhật ngay</button>
+  <div class="trangthai" id="trangThai">Đang tải...</div>
+</div>
+<div id="vungLoi"></div>
+<div class="ds" id="ds"></div>
+</div>
+
+<script>
+"use strict";
+const LAP_LAI_GIAY = 60;                   // tự cập nhật sau mỗi 60 giây
+const MAY_CHU = ["https://data-api.binance.vision", "https://api.binance.com"];
+const $ = id => document.getElementById(id);
+
+async function layDuLieu() {
+  let loi;
+  for (const may of MAY_CHU) {
+    try { const r = await fetch(may + "/api/v3/ticker/24hr"); if (r.ok) return await r.json(); loi = new Error("Máy chủ trả lỗi " + r.status); }
+    catch (e) { loi = e; }
+  }
+  throw loi;
+}
+
+const gia = v => v.toLocaleString("vi-VN", { maximumFractionDigits: v >= 1000 ? 2 : v >= 1 ? 4 : v >= 0.01 ? 5 : 8 });
+const tien = v => v >= 1e9 ? (v / 1e9).toFixed(2).replace(".", ",") + " tỷ" : (v / 1e6).toFixed(1).replace(".", ",") + " triệu";
+
+let dangChay = false, demNguoc = null, conLai = 0;
+async function capNhat() {
+  if (dangChay) return; dangChay = true; $("nutQuet").disabled = true; $("vungLoi").innerHTML = "";
+  try {
+    const MUC_TANG = docMuc();
+    const tk = await layDuLieu();
+    const bayGio = Date.now();
+    const ds = tk
+      .filter(t => t.symbol.endsWith("USDT") && bayGio - t.closeTime < 3600e3 && +t.priceChangePercent > MUC_TANG)   // bỏ mã đã ngừng giao dịch
+      .sort((a, b) => b.priceChangePercent - a.priceChangePercent);
+
+    $("ds").innerHTML = ds.length ? ds.map((t, i) => {
+      const goc = t.symbol.replace(/USDT$/, ""), ht = +t.lastPrice, cao = +t.highPrice;
+      const cachDinh = (ht - cao) / cao * 100;
+      return `<a class="dong" href="https://www.binance.com/vi/trade/${goc}_USDT?type=spot" target="_blank" rel="noopener">
+        <span class="hang">#${i + 1}</span>
+        <span class="ma">${goc}<span>/USDT</span></span>
+        <span class="tang">+${(+t.priceChangePercent).toFixed(2).replace(".", ",")}%</span>
+        <span class="phu">
+          <span>Giá <b>${gia(ht)}</b></span>
+          <span>Cách đỉnh 24 giờ <b>${cachDinh.toFixed(1).replace(".", ",")}%</b></span>
+          <span>Giao dịch 24 giờ <b>${tien(+t.quoteVolume)}</b> USDT</span>
+        </span></a>`;
+    }).join("") : `<div class="trong">Hiện chưa có đồng nào tăng trên ${MUC_TANG}% trong 24 giờ.</div>`;
+
+    $("trangThai").dataset.goc = `Có <b>${ds.length}</b> đồng tăng trên ${MUC_TANG}%, cập nhật lúc <b>${new Date().toLocaleTimeString("vi-VN")}</b>`;
+  } catch (e) {
+    $("vungLoi").innerHTML = `<div class="loi">Không đọc được dữ liệu Binance (${e.message || e}). Kiểm tra mạng rồi bấm "Cập nhật ngay".</div>`;
+    $("trangThai").dataset.goc = "Lần cập nhật bị lỗi";
+  } finally {
+    dangChay = false; $("nutQuet").disabled = false;
+    conLai = LAP_LAI_GIAY; veTrangThai();
+  }
+}
+// Mức tăng do Tú nhập, nhớ lại cho lần mở sau
+const KHOA = "quetcoin_muctang";
+try { const luu = localStorage.getItem(KHOA); if (luu !== null) $("mucTang").value = luu; } catch {}
+function docMuc() { const v = parseFloat(String($("mucTang").value).replace(",", ".")); return isFinite(v) ? v : 10; }
+$("mucTang").addEventListener("change", () => { try { localStorage.setItem(KHOA, $("mucTang").value); } catch {} capNhat(); });
+$("mucTang").addEventListener("keydown", e => { if (e.key === "Enter") $("mucTang").blur(); });
+function veTrangThai() { $("trangThai").innerHTML = ($("trangThai").dataset.goc || "") + ` · lần sau <b>${conLai}</b> giây`; }
+setInterval(() => { if (dangChay) return; conLai--; if (conLai <= 0) capNhat(); else veTrangThai(); }, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) capNhat(); });
+$("nutQuet").addEventListener("click", capNhat);
+capNhat();
+</script>
+</body>
+</html>
