@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quét Coin Bứt Phá 15 Phút</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Bố cục: một cột thẻ coin xếp hạng theo điểm, thanh trạng thái quét dính trên cùng */
+:root{
+  --nen:#f3f5f2; --mat:#ffffff; --chu:#17201b; --phu:#5d6a62; --vien:#d9e0db;
+  --nhan:#0b7a55; --nhan-nhat:#e1f3ea; --do:#c23b2e; --do-nhat:#fbe7e4; --vang:#a8650a; --vang-nhat:#fbf0dc;
+  --chu-than:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --chu-so:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --nen:#0f1512; --mat:#17201b; --chu:#e6ede8; --phu:#93a198; --vien:#2a352f;
+  --nhan:#3fcf95; --nhan-nhat:#163527; --do:#ff7a6b; --do-nhat:#3a1b17; --vang:#f0b44c; --vang-nhat:#3a2b12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --nen:#0f1512; --mat:#17201b; --chu:#e6ede8; --phu:#93a198; --vien:#2a352f;
+  --nhan:#3fcf95; --nhan-nhat:#163527; --do:#ff7a6b; --do-nhat:#3a1b17; --vang:#f0b44c; --vang-nhat:#3a2b12; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--nen);color:var(--chu);font:15px/1.5 var(--chu-than);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.khung{max-width:760px;margin:0 auto}
+header{padding-block:22px 6px}
+h1{font-size:1.55rem;font-weight:800;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.mota{color:var(--phu);margin:4px 0 0;font-size:.92rem}
+.thanh{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--nen);padding-block:10px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--vien)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--nen)}
+button{font:600 .9rem var(--chu-than);border-radius:10px;border:1px solid var(--vien);background:var(--mat);color:var(--chu);padding:9px 14px;cursor:pointer}
+button.chinh{background:var(--nhan);border-color:var(--nhan);color:var(--mat)}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--nhan);outline-offset:2px}
+button:disabled{opacity:.55;cursor:wait}
+.trangthai{font-size:.85rem;color:var(--phu);flex:1 1 200px;min-width:0}
+.trangthai b{color:var(--chu);font-family:var(--chu-so)}
+details.caidat{margin-top:14px;background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:4px 14px}
+details.caidat summary{cursor:pointer;font-weight:600;padding-block:8px}
+.luoi{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 16px;padding-block:6px 14px}
+.luoi label{display:flex;flex-direction:column;gap:3px;font-size:.84rem;color:var(--phu)}
+.luoi input{font:600 .95rem var(--chu-so);padding:7px 9px;border-radius:8px;border:1px solid var(--vien);background:var(--nen);color:var(--chu);width:100%}
+h2{font-size:1.05rem;margin:26px 0 10px;font-weight:800}
+h2 small{font-weight:500;color:var(--phu);font-size:.82rem;margin-left:6px}
+.danhsach{display:flex;flex-direction:column;gap:12px}
+.the{background:var(--mat);border:1px solid var(--vien);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dau{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hang{font:700 .85rem var(--chu-so);color:var(--phu)}
+.ma{font-size:1.2rem;font-weight:800}
+.ma a{color:inherit;text-decoration:none}
+.gia{font:700 .95rem var(--chu-so);margin-left:auto}
+.diem{display:flex;align-items:center;gap:8px;font:700 .85rem var(--chu-so)}
+.vach{flex:1;height:8px;border-radius:99px;background:var(--nen);overflow:hidden}
+.vach i{display:block;height:100%;background:var(--nhan);border-radius:99px}
+.chip{display:flex;flex-wrap:wrap;gap:6px}
+.chip span{font-size:.8rem;padding:3px 9px;border-radius:99px;background:var(--nen);border:1px solid var(--vien);white-space:nowrap}
+.chip .tot{background:var(--nhan-nhat);border-color:transparent;color:var(--nhan);font-weight:600}
+.chip .canh{background:var(--vang-nhat);border-color:transparent;color:var(--vang);font-weight:600}
+.muc{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.muc div{background:var(--nen);border-radius:10px;padding:7px 8px;min-width:0}
+.muc small{display:block;font-size:.72rem;color:var(--phu);text-transform:uppercase;letter-spacing:.04em}
+.muc b{display:block;font:700 .86rem var(--chu-so);overflow-wrap:anywhere}
+.muc em{font-style:normal;font-size:.72rem;font-family:var(--chu-so)}
+.muc .sl b{color:var(--do)} .muc .tp b{color:var(--nhan)}
+@media (max-width:430px){.muc{grid-template-columns:repeat(2,1fr)}}
+.trong{background:var(--mat);border:1px dashed var(--vien);border-radius:14px;padding:18px;color:var(--phu)}
+.loi{background:var(--do-nhat);color:var(--do);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.9rem}
+.bang{overflow-x:auto;background:var(--mat);border:1px solid var(--vien);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.84rem;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--vien);white-space:nowrap}
+th{color:var(--phu);font-weight:600;font-size:.76rem}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+td{font-family:var(--chu-so)}
+.duong{color:var(--nhan)} .am{color:var(--do)}
+.tongket{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.88rem;color:var(--phu);margin-bottom:8px}
+.tongket b{color:var(--chu);font-family:var(--chu-so)}
+.chuy{font-size:.82rem;color:var(--phu);margin-top:22px;line-height:1.55}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="khung">
+<header>
+  <h1>Quét Coin Bứt Phá 15 Phút</h1>
+  <p class="mota">Sàn Binance, giao ngay, cặp USDT. Tự quét lại sau mỗi lần đóng nến 15 phút và xếp hạng đồng nào nên ưu tiên.</p>
+</header>
+
+<div class="thanh">
+  <button id="nutQuet" class="chinh" type="button">Quét ngay</button>
+  <div class="trangthai" id="trangThai">Chưa quét.</div>
+</div>
+<div id="vungLoi"></div>
+
+<details class="caidat">
+  <summary>Ngưỡng lọc (bấm để chỉnh)</summary>
+  <div class="luoi">
+    <label for="kl_gap">Khối lượng nến gấp ít nhất bao nhiêu lần trung bình 20 nến trước<input id="kl_gap" type="number" step="0.5" value="3"></label>
+    <label for="tang_toithieu">Nến phải tăng ít nhất (%)<input id="tang_toithieu" type="number" step="0.5" value="2"></label>
+    <label for="gd24h">Tổng giao dịch 24 giờ tối thiểu (triệu USDT)<input id="gd24h" type="number" step="1" value="5"></label>
+    <label for="tang24h">Bỏ coin đã tăng trong 24 giờ quá (%)<input id="tang24h" type="number" step="1" value="20"></label>
+    <label for="rau">Bỏ nến có râu trên dài hơn (% chiều dài nến)<input id="rau" type="number" step="5" value="35"></label>
+    <label for="mua_cd">Mua chủ động tối thiểu (% khối lượng nến)<input id="mua_cd" type="number" step="5" value="55"></label>
+  </div>
+</details>
+
+<h2>Đề xuất ưu tiên <small id="gioNen"></small></h2>
+<div class="danhsach" id="dsDeXuat"><div class="trong">Đang chờ lượt quét đầu tiên. Lượt quét đọc toàn bộ cặp USDT trên Binance, mất khoảng 20 đến 40 giây.</div></div>
+
+<h2>Sát ngưỡng, cần để mắt <small>khối lượng tăng nhưng chưa đủ điều kiện</small></h2>
+<div class="danhsach" id="dsSatNguong"><div class="trong">Chưa có dữ liệu.</div></div>
+
+<h2>Nhật ký tín hiệu <small>kiểm chứng giá đi tiếp hay quay đầu</small></h2>
+<div class="tongket" id="tongKet"></div>
+<div class="bang"><table>
+  <thead><tr><th>Giờ</th><th>Mã</th><th>Giá vào</th><th>Sau 1 giờ</th><th>Sau 4 giờ</th><th>Kết quả</th></tr></thead>
+  <tbody id="bangNhatKy"><tr><td colspan="6" style="text-align:left;font-family:var(--chu-than);color:var(--phu)">Chưa có tín hiệu nào được ghi.</td></tr></tbody>
+</table></div>
+<p style="margin-top:8px"><button id="nutXoaNK" type="button">Xóa nhật ký</button></p>
+
+<p class="chuy">Cách đọc: <b>Vùng mua</b> là giá hồi về giữa thân nến bứt phá, không mua đuổi ngay đỉnh nến. <b>Cắt lỗ</b> đặt dưới đáy nến bứt phá. <b>Mục tiêu 1, 2</b> tính theo tỷ lệ lời gấp 1,5 và 2 lần mức lỗ. Kết quả trong nhật ký: "Chạm mục tiêu 1" hoặc "Chạm cắt lỗ" là cái nào xảy ra trước trong 5 giờ sau tín hiệu, tính từ vùng mua. Đây là công cụ lọc tín hiệu, không phải lời khuyên đầu tư. Luôn đặt cắt lỗ.</p>
+</div>
+
+<script>
+"use strict";
+// ===== Nguồn dữ liệu công khai của Binance (không cần khóa tài khoản) =====
+const MAY_CHU = ["https://data-api.binance.vision", "https://api.binance.com"];
+let mayChuDung = null;
+
+// Đồng ổn định giá và mã đòn bẩy: không quét
+const BO_QUA = new Set(["USDC","FDUSD","TUSD","BUSD","DAI","USDP","EUR","AEUR","USDE","XUSD","USD1","PAXG","WBTC","WBETH","BFUSD","EURI"]);
+
+const $ = id => document.getElementById(id);
+const ngu = ms => new Promise(r => setTimeout(r, ms));
+
+async function layJson(duongDan) {
+  const ds = mayChuDung ? [mayChuDung, ...MAY_CHU.filter(m => m !== mayChuDung)] : MAY_CHU;
+  let loiCuoi;
+  for (const may of ds) {
+    try {
+      const r = await fetch(may + duongDan);
+      if (r.status === 429 || r.status === 418) { await ngu(3000); throw new Error("Sàn đang giới hạn tần suất, thử lại sau"); }
+      if (!r.ok) throw new Error("Máy chủ trả lỗi " + r.status);
+      mayChuDung = may;
+      return await r.json();
+    } catch (e) { loiCuoi = e; }
+  }
+  throw loiCuoi;
+}
+
+// Chạy nhiều yêu cầu song song nhưng giới hạn số luồng để không bị sàn chặn
+async function chayGioiHan(ds, soLuong, viec) {
+  const kq = new Array(ds.length); let i = 0;
+  async function tho() { while (i < ds.length) { const k = i++; try { kq[k] = await viec(ds[k], k); } catch { kq[k] = null; } } }
+  await Promise.all(Array.from({ length: soLuong }, tho));
+  return kq;
+}
+
+function docNguong() {
+  const so = id => parseFloat($(id).value);
+  return { klGap: so("kl_gap"), tangToiThieu: so("tang_toithieu"), gd24h: so("gd24h") * 1e6,
+           tang24h: so("tang24h"), rau: so("rau") / 100, muaCD: so("mua_cd") / 100 };
+}
+
+function ema(mang, chuKy) {
+  const k = 2 / (chuKy + 1); let e = mang.slice(0, chuKy).reduce((a, b) => a + b, 0) / chuKy;
+  for (let i = chuKy; i < mang.length; i++) e = mang[i] * k + e * (1 - k);
+  return e;
+}
+
+// ===== Chấm điểm một đồng từ 30 nến 15 phút (nến cuối là nến đang chạy, bỏ qua) =====
+// Mỗi nến của Binance: [giờ mở, mở, cao, thấp, đóng, KL coin, giờ đóng, KL USDT, số lệnh, KL mua chủ động coin, KL mua chủ động USDT]
+function chamDiem(nen, ng) {
+  if (!nen || nen.length < 27) return null;
+  const n = nen.length - 2;                     // nến vừa đóng
+  const x = nen[n].map(Number);
+  const [gioMo, mo, cao, thap, dong, , , klUsdt, , , muaUsdt] = x;
+  const truoc20 = nen.slice(n - 20, n).map(r => +r[7]);
+  const tbKL = truoc20.reduce((a, b) => a + b, 0) / 20;
+  if (!tbKL || cao <= thap) return null;
+  const dinh24 = Math.max(...nen.slice(n - 24, n).map(r => +r[2]));   // đỉnh 6 giờ trước
+  const kq = {
+    gioMo, mo, cao, thap, dong,
+    klGap: klUsdt / tbKL,
+    tang: (dong - mo) / mo * 100,
+    viTriDong: (dong - thap) / (cao - thap),
+    rauTren: (cao - Math.max(mo, dong)) / (cao - thap),
+    muaCD: klUsdt ? muaUsdt / klUsdt : 0,
+    phaDinh: dong > dinh24, dinh24, klUsdt
+  };
+  kq.datDK = kq.klGap >= ng.klGap && kq.tang >= ng.tangToiThieu && kq.rauTren <= ng.rau && kq.muaCD >= ng.muaCD;
+  kq.satNguong = !kq.datDK && kq.klGap >= Math.max(2, ng.klGap * 0.6) && kq.tang >= Math.max(0.8, ng.tangToiThieu * 0.5) && kq.rauTren <= 0.5;
+  return kq;
+}
+
+function tongDiem(k) {
+  const kep = (v, a, b) => Math.max(a, Math.min(b, v));
+  return Math.round(
+    kep(k.klGap / 10, 0, 1) * 35 +                 // khối lượng đột biến: nặng nhất
+    kep(k.tang / 8, 0, 1) * 20 +                    // mức tăng của nến
+    (k.phaDinh ? 15 : 0) +                          // vượt đỉnh 6 giờ
+    (k.xuHuongH1 ? 10 : 0) +                        // khung 1 giờ đang tăng
+    kep((k.muaCD - 0.5) / 0.3, 0, 1) * 10 +         // lực mua chủ động
+    kep(k.viTriDong, 0, 1) * 10                     // đóng cửa sát đỉnh nến
+  );
+}
+
+function tinhMucGia(k) {
+  const giuaThan = k.mo + (k.dong - k.mo) * 0.5;
+  const vao = k.phaDinh ? Math.max(giuaThan, Math.min(k.dinh24, k.dong)) : giuaThan;   // ưu tiên mức vừa phá vỡ nếu cao hơn giữa thân
+  const catLo = k.thap * 0.998;
+  const r = vao - catLo;
+  return { vao, catLo, mt1: vao + r * 1.5, mt2: vao + r * 2, loPct: r / vao * 100 };
+}
+
+// ===== Định dạng =====
+function dinhDangGia(v) {
+  if (!isFinite(v)) return "-";
+  const so = v >= 1000 ? 2 : v >= 1 ? 4 : v >= 0.01 ? 5 : 8;
+  return v.toLocaleString("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: so });
+}
+const pct = v => (v >= 0 ? "+" : "") + v.toFixed(2).replace(".", ",") + "%";
+const gio = ms => new Date(ms).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+const ngayGio = ms => new Date(ms).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
+const tenCoin = s => s.replace(/USDT$/, "");
+const lienKet = s => "https://www.binance.com/vi/trade/" + tenCoin(s) + "_USDT?type=spot";
+
+// ===== Vẽ thẻ =====
+function veThe(c, hang, rutGon) {
+  const m = tinhMucGia(c);
+  const chip = [
+    `<span class="tot">Khối lượng gấp ${c.klGap.toFixed(1).replace(".", ",")} lần</span>`,
+    `<span class="${c.tang >= 2 ? "tot" : ""}">Nến ${pct(c.tang)}</span>`,
+    `<span class="${c.muaCD >= 0.6 ? "tot" : ""}">Mua chủ động ${Math.round(c.muaCD * 100)}%</span>`,
+    c.phaDinh ? `<span class="tot">Vượt đỉnh 6 giờ</span>` : `<span>Chưa vượt đỉnh 6 giờ</span>`,
+    c.xuHuongH1 === undefined ? "" : c.xuHuongH1 ? `<span class="tot">Khung 1 giờ đang tăng</span>` : `<span class="canh">Khung 1 giờ chưa tăng</span>`,
+    c.coinMoi ? `<span class="canh">Mới niêm yết dưới 7 ngày</span>` : "",
+    `<span>24 giờ ${pct(c.tang24h)}</span>`,
+    `<span>Giao dịch 24 giờ ${(c.gd24h / 1e6).toFixed(1).replace(".", ",")} triệu USDT</span>`
+  ].join("");
+  const muc = rutGon ? "" : `<div class="muc">
+      <div><small>Vùng mua</small><b>${dinhDangGia(m.vao)}</b><em>${pct((m.vao - c.giaHienTai) / c.giaHienTai * 100)} so với giá</em></div>
+      <div class="sl"><small>Cắt lỗ</small><b>${dinhDangGia(m.catLo)}</b><em>-${m.loPct.toFixed(2).replace(".", ",")}%</em></div>
+      <div class="tp"><small>Mục tiêu 1</small><b>${dinhDangGia(m.mt1)}</b><em>lời 1,5 lần lỗ</em></div>
+      <div class="tp"><small>Mục tiêu 2</small><b>${dinhDangGia(m.mt2)}</b><em>lời 2 lần lỗ</em></div>
+    </div>`;
+  return `<div class="the">
+    <div class="dau"><span class="hang">#${hang}</span><span class="ma"><a href="${lienKet(c.ma)}" target="_blank" rel="noopener">${tenCoin(c.ma)}<span style="color:var(--phu);font-weight:500">/USDT</span></a></span>
+      <span class="gia">${dinhDangGia(c.giaHienTai)}</span></div>
+    ${rutGon ? "" : `<div class="diem">Điểm ${c.diem}<div class="vach"><i style="width:${c.diem}%"></i></div></div>`}
+    <div class="chip">${chip}</div>${muc}</div>`;
+}
+
+// ===== Nhật ký tín hiệu (lưu trong trình duyệt này) =====
+const KHOA_NK = "quetcoin_nhatky_v1";
+function docNK() { try { return JSON.parse(localStorage.getItem(KHOA_NK)) || []; } catch { return []; } }
+function ghiNK(ds) { try { localStorage.setItem(KHOA_NK, JSON.stringify(ds.slice(-200))); } catch {} }
+
+function themVaoNK(dsDat) {
+  const nk = docNK();
+  for (const c of dsDat.slice(0, 5)) {
+    if (nk.some(x => x.ma === c.ma && x.gioNen === c.gioMo)) continue;
+    const m = tinhMucGia(c);
+    nk.push({ ma: c.ma, gioNen: c.gioMo, gioDong: c.gioMo + 15 * 60e3, vao: m.vao, catLo: m.catLo, mt1: m.mt1, diem: c.diem });
+  }
+  ghiNK(nk);
+}
+
+async function capNhatNK() {
+  const nk = docNK(); const bayGio = Date.now();
+  const canXet = nk.filter(x => !x.xong && bayGio - x.gioDong > 15 * 60e3);
+  await chayGioiHan(canXet, 4, async x => {
+    const nen = await layJson(`/api/v3/klines?symbol=${x.ma}&interval=15m&startTime=${x.gioDong}&limit=20`);
+    const daDong = nen.filter(r => +r[6] < bayGio);
+    let daVao = false, ketQua = null;
+    for (const r of daDong) {
+      const cao = +r[2], thap = +r[3];
+      if (!daVao && thap <= x.vao) daVao = true;
+      if (daVao) {
+        if (thap <= x.catLo) { ketQua = "lo"; break; }
+        if (cao >= x.mt1) { ketQua = "loi"; break; }
+      }
+    }
+    const giaSau = soNen => daDong.length >= soNen ? +daDong[soNen - 1][4] : null;
+    x.sau1h = giaSau(4); x.sau4h = giaSau(16); x.daVao = daVao;
+    x.ketQua = ketQua || (daDong.length >= 20 ? (daVao ? "hoa" : "khongkhop") : null);
+    if (x.ketQua) x.xong = true;
+  });
+  ghiNK(nk); veNK();
+}
+
+function veNK() {
+  const nk = docNK().slice().reverse();
+  const bang = $("bangNhatKy");
+  if (!nk.length) { bang.innerHTML = `<tr><td colspan="6" style="text-align:left;font-family:var(--chu-than);color:var(--phu)">Chưa có tín hiệu nào được ghi.</td></tr>`; $("tongKet").innerHTML = ""; return; }
+  const doi = (g, v) => g == null ? "<span style='color:var(--phu)'>chờ</span>" : `<span class="${g >= v ? "duong" : "am"}">${pct((g - v) / v * 100)}</span>`;
+  const nhan = { loi: "<span class='duong'>Chạm mục tiêu 1</span>", lo: "<span class='am'>Chạm cắt lỗ</span>", hoa: "Chưa chạm mức nào", khongkhop: "Giá không hồi về vùng mua" };
+  bang.innerHTML = nk.map(x => `<tr><td>${ngayGio(x.gioDong)}</td><td>${tenCoin(x.ma)}</td><td>${dinhDangGia(x.vao)}</td>
+    <td>${doi(x.sau1h, x.vao)}</td><td>${doi(x.sau4h, x.vao)}</td><td style="font-family:var(--chu-than)">${x.ketQua ? nhan[x.ketQua] : (x.daVao ? "Đã khớp, đang theo dõi" : "Đang theo dõi")}</td></tr>`).join("");
+  const loi = nk.filter(x => x.ketQua === "loi").length, lo = nk.filter(x => x.ketQua === "lo").length;
+  $("tongKet").innerHTML = `<span>Tổng tín hiệu <b>${nk.length}</b></span><span>Chạm mục tiêu 1 <b>${loi}</b></span><span>Chạm cắt lỗ <b>${lo}</b></span>` +
+    (loi + lo ? `<span>Tỷ lệ thắng <b>${Math.round(loi / (loi + lo) * 100)}%</b></span>` : "");
+}
+
+// ===== Một lượt quét =====
+let dangQuet = false;
+async function quet() {
+  if (dangQuet) return; dangQuet = true;
+  $("nutQuet").disabled = true; $("vungLoi").innerHTML = "";
+  const ng = docNguong(); const batDau = Date.now();
+  try {
+    $("trangThai").textContent = "Đang đọc danh sách coin...";
+    const tk = await layJson("/api/v3/ticker/24hr");
+    const ungVien = tk.filter(t => {
+      if (!t.symbol.endsWith("USDT")) return false;
+      const goc = tenCoin(t.symbol);
+      if (BO_QUA.has(goc) || /(UP|DOWN|BULL|BEAR)$/.test(goc)) return false;
+      if (Date.now() - t.closeTime > 3600e3) return false;          // mã đã ngừng giao dịch
+      return +t.quoteVolume >= ng.gd24h && +t.priceChangePercent <= ng.tang24h;
+    });
+    const thongTin = Object.fromEntries(ungVien.map(t => [t.symbol, t]));
+
+    let xong = 0;
+    const kq = await chayGioiHan(ungVien, 8, async t => {
+      const nen = await layJson(`/api/v3/klines?symbol=${t.symbol}&interval=15m&limit=30`);
+      $("trangThai").innerHTML = `Đang quét nến 15 phút: <b>${++xong}</b>/${ungVien.length} đồng`;
+      const c = chamDiem(nen, ng); if (!c) return null;
+      c.ma = t.symbol; c.giaHienTai = +nen[nen.length - 1][4];
+      c.tang24h = +t.priceChangePercent; c.gd24h = +t.quoteVolume;
+      return c;
+    });
+    const hopLe = kq.filter(Boolean);
+    const dat = hopLe.filter(c => c.datDK);
+    const sat = hopLe.filter(c => c.satNguong).sort((a, b) => b.klGap - a.klGap).slice(0, 8);
+
+    // Chỉ các đồng đạt điều kiện mới xét thêm khung 1 giờ và ngày niêm yết
+    $("trangThai").textContent = "Đang kiểm tra khung 1 giờ...";
+    await chayGioiHan(dat, 6, async c => {
+      const [h1, d1] = await Promise.all([
+        layJson(`/api/v3/klines?symbol=${c.ma}&interval=1h&limit=30`),
+        layJson(`/api/v3/klines?symbol=${c.ma}&interval=1d&limit=8`)
+      ]);
+      const dongH1 = h1.map(r => +r[4]);
+      c.xuHuongH1 = dongH1.length >= 21 && dongH1[dongH1.length - 1] > ema(dongH1, 20);
+      c.coinMoi = d1.length < 8;
+    });
+    dat.forEach(c => { c.diem = tongDiem(c) - (c.coinMoi ? 10 : 0); });
+    dat.sort((a, b) => b.diem - a.diem);
+
+    const gioMoNen = hopLe.length ? hopLe[0].gioMo : null;
+    $("gioNen").textContent = gioMoNen ? `nến ${gio(gioMoNen)} đến ${gio(gioMoNen + 15 * 60e3)}` : "";
+    $("dsDeXuat").innerHTML = dat.length ? dat.slice(0, 10).map((c, i) => veThe(c, i + 1)).join("")
+      : `<div class="trong">Nến vừa rồi chưa có đồng nào đạt đủ điều kiện. Thị trường đang yên, không có tín hiệu thì không vào lệnh.</div>`;
+    $("dsSatNguong").innerHTML = sat.length ? sat.map((c, i) => veThe(c, i + 1, true)).join("")
+      : `<div class="trong">Không có đồng nào sát ngưỡng.</div>`;
+
+    themVaoNK(dat);
+    $("trangThai").innerHTML = `Quét xong <b>${hopLe.length}</b> đồng trong ${Math.round((Date.now() - batDau) / 1000)} giây, <b>${dat.length}</b> đồng đạt điều kiện.`;
+    await capNhatNK();
+    henGio();
+  } catch (e) {
+    $("vungLoi").innerHTML = `<div class="loi">Không đọc được dữ liệu Binance (${e.message || e}). Kiểm tra mạng rồi bấm "Quét ngay". Nếu mạng bình thường mà vẫn lỗi, hãy mở trang bằng trình duyệt Chrome hoặc đưa lên trang web của Tú (ví dụ GitHub Pages), vì một số ứng dụng xem tệp chặn kết nối ra ngoài.</div>`;
+    $("trangThai").textContent = "Lượt quét bị lỗi.";
+    henGio();
+  } finally { dangQuet = false; $("nutQuet").disabled = false; }
+}
+
+// ===== Tự quét lại 10 giây sau mỗi lần đóng nến 15 phút =====
+let hen = null, demNguoc = null, mocTiepTheo = 0;
+function henGio() {
+  clearTimeout(hen); clearInterval(demNguoc);
+  const ky = 15 * 60e3;
+  mocTiepTheo = Math.ceil(Date.now() / ky) * ky + 10e3;
+  if (mocTiepTheo - Date.now() < 15e3) mocTiepTheo += ky;
+  hen = setTimeout(quet, mocTiepTheo - Date.now());
+  const goc = $("trangThai").innerHTML.split(" · ")[0];
+  demNguoc = setInterval(() => {
+    const con = Math.max(0, mocTiepTheo - Date.now());
+    $("trangThai").innerHTML = goc + ` · Lượt tiếp theo sau <b>${Math.floor(con / 60e3)}:${String(Math.floor(con / 1e3) % 60).padStart(2, "0")}</b>`;
+  }, 1000);
+}
+// Điện thoại thường cho trang "ngủ"; mở lại trang thì quét ngay nếu đã quá giờ
+document.addEventListener("visibilitychange", () => { if (!document.hidden && mocTiepTheo && Date.now() > mocTiepTheo) quet(); });
+
+$("nutQuet").addEventListener("click", quet);
+$("nutXoaNK").addEventListener("click", () => {
+  const b = $("nutXoaNK");
+  if (b.dataset.xacNhan) { ghiNK([]); veNK(); b.textContent = "Xóa nhật ký"; delete b.dataset.xacNhan; }
+  else { b.dataset.xacNhan = "1"; b.textContent = "Bấm lần nữa để xóa hẳn"; setTimeout(() => { b.textContent = "Xóa nhật ký"; delete b.dataset.xacNhan; }, 4000); }
+});
+// Nhớ ngưỡng đã chỉnh
+const CAC_O = ["kl_gap","tang_toithieu","gd24h","tang24h","rau","mua_cd"];
+try { const luu = JSON.parse(localStorage.getItem("quetcoin_nguong_v1") || "{}"); CAC_O.forEach(id => { if (luu[id] != null) $(id).value = luu[id]; }); } catch {}
+CAC_O.forEach(id => $(id).addEventListener("change", () => { try { localStorage.setItem("quetcoin_nguong_v1", JSON.stringify(Object.fromEntries(CAC_O.map(k => [k, $(k).value])))); } catch {} }));
+
+veNK();
+quet();
+</script>
+</body>
+</html>
